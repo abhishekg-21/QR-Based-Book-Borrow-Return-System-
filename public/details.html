@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reader Details</title>
+    <link rel="stylesheet" href="detail.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Login Section -->
+      <div id="login-section">
+        <h2>Reader Login</h2>
+        <input type="text" id="reader-id" placeholder="Enter Reader ID" />
+        <input type="text" id="reader-name" placeholder="Enter Full Name" />
+        <button id="login-btn">Login</button>
+        <p id="error-message" class="error"></p>
+      </div>
+
+      <!-- Details Section (Hidden Initially) -->
+      <div id="details-section" class="hidden">
+        <h2>Reader Details</h2>
+        <div id="reader-info"></div>
+
+        <h2>Issued Books</h2>
+        <div id="issued-books"></div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        document
+          .getElementById("login-btn")
+          .addEventListener("click", validateReader);
+      });
+
+      let readerID = "";
+
+      // ✅ Validate Reader
+      async function validateReader() {
+        const id = document.getElementById("reader-id").value.trim();
+        const name = document.getElementById("reader-name").value.trim();
+        const errorMessage = document.getElementById("error-message");
+
+        if (!id || !name) {
+          errorMessage.textContent = "⚠️ Reader ID and Name are required!";
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `/validate-reader?reader_id=${id}&full_name=${name}`
+          );
+          const data = await response.json();
+
+          if (data.valid) {
+            alert("✅ Login Successful!");
+            readerID = id;
+            document.getElementById("login-section").classList.add("hidden");
+            document
+              .getElementById("details-section")
+              .classList.remove("hidden");
+            fetchReaderDetails();
+            fetchIssuedBooks();
+          } else {
+            errorMessage.textContent = "❌ Invalid Reader ID or Name!";
+          }
+        } catch (error) {
+          console.error(error);
+          errorMessage.textContent = "❌ Server error. Try again!";
+        }
+      }
+
+      // ✅ Fetch Reader Details
+      async function fetchReaderDetails() {
+        try {
+          const response = await fetch(`/reader-details?reader_id=${readerID}`);
+          const data = await response.json();
+          document.getElementById("reader-info").innerHTML = `
+            <p><strong>Name:</strong> ${data.full_name}</p>
+            <p><strong>Email:</strong> ${data.email}</p>
+            <p><strong>Phone:</strong> ${data.mobile_number}</p>
+            <p><strong>Age:</strong> ${data.dob}</p>
+            <p><strong>Gender:</strong> ${data.gender}</p>
+            <p><strong>Address:</strong> ${data.address}</p>
+        `;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      // ✅ Fetch Issued Books
+      async function fetchIssuedBooks() {
+        try {
+          const response = await fetch(`/issued-books?reader_id=${readerID}`);
+          const books = await response.json();
+          renderIssuedBooks(books);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      // ✅ Render Issued Books List
+      function renderIssuedBooks(books) {
+        const bookList = document.getElementById("issued-books");
+        bookList.innerHTML = "";
+
+        books.forEach((book) => {
+          const bookItem = document.createElement("div");
+          bookItem.classList.add("book-item");
+
+          bookItem.innerHTML = `
+            <p><strong>Book:</strong> ${book.book_id}</p>
+            <p><strong>Book:</strong> ${book.book_name}</p>
+            <p><strong>Issue Date:</strong> ${book.issue_date}</p>
+            <p><strong>Due Date:</strong> ${book.due_date}</p>
+            <p><strong>Return Status:</strong> ${
+              book.return_date ? "Returned" : "Pending"
+            }</p>
+        `;
+
+          bookList.appendChild(bookItem);
+        });
+      }
+    </script>
+  </body>
+</html>

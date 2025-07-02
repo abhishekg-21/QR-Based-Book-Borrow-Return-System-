@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Return a Book</title>
+    <link rel="stylesheet" href="return.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Login Section -->
+      <div id="login-section">
+        <h2>Return a Book</h2>
+        <input type="text" id="reader-id" placeholder="Reader ID" />
+        <input type="text" id="reader-name" placeholder="Full Name" />
+        <button id="login-btn">Login</button>
+        <p id="error-message"></p>
+      </div>
+
+      <!-- Book Selection Section -->
+      <div id="book-section" class="hidden">
+        <h2>Select Books to Return</h2>
+        <input
+          type="text"
+          id="search-book"
+          placeholder="Search Books"
+          onkeyup="searchBooks()"
+        />
+        <div id="book-list"></div>
+        <button onclick="submitReturn()">Submit Return Request</button>
+      </div>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        document
+          .getElementById("login-btn")
+          .addEventListener("click", validateReader);
+      });
+
+      let selectedBooks = [];
+      let readerID = "";
+
+      // ✅ Validate Reader
+      async function validateReader() {
+        const id = document.getElementById("reader-id").value.trim();
+        const name = document.getElementById("reader-name").value.trim();
+        const errorMessage = document.getElementById("error-message");
+
+        if (!id || !name) {
+          errorMessage.textContent = "⚠️ Reader ID and Name are required!";
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `/validate-reader?reader_id=${id}&full_name=${name}`
+          );
+          const data = await response.json();
+
+          if (data.valid) {
+            alert("✅ Login Successful!");
+            readerID = id;
+            document.getElementById("login-section").classList.add("hidden");
+            document.getElementById("book-section").classList.remove("hidden");
+            fetchBorrowedBooks();
+          } else {
+            errorMessage.textContent = "❌ Invalid Reader ID or Name!";
+          }
+        } catch (error) {
+          console.error(error);
+          errorMessage.textContent = "❌ Server error. Try again!";
+        }
+      }
+
+      // ✅ Fetch Borrowed Books
+      async function fetchBorrowedBooks() {
+        try {
+          const response = await fetch(`/borrowed-books?reader_id=${readerID}`);
+          const books = await response.json();
+          renderBookList(books);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      // ✅ Render Borrowed Books List
+      function renderBookList(books) {
+        const bookList = document.getElementById("book-list");
+        bookList.innerHTML = "";
+
+        books.forEach((book) => {
+          const bookItem = document.createElement("div");
+          bookItem.classList.add("book-item");
+
+          bookItem.innerHTML = `
+            <span>${book.book_id} - ${book.book_name}</span>
+            <button id="book-${book.book_id}" onclick="selectBook(${book.book_id})">Select</button>
+        `;
+
+          bookList.appendChild(bookItem);
+        });
+      }
+
+      // ✅ Select Book for Return (Max 2, No Duplicates)
+      function selectBook(bookID) {
+        const bookButton = document.getElementById(`book-${bookID}`);
+
+        if (selectedBooks.length >= 2) {
+          alert("⚠️ You can only return 2 books at a time!");
+          return;
+        }
+
+        if (selectedBooks.includes(bookID)) {
+          alert("⚠️ You have already selected this book!");
+          return;
+        }
+
+        selectedBooks.push(bookID);
+        bookButton.style.backgroundColor = "red"; // Change button color to red
+        bookButton.textContent = "Selected";
+      }
+
+      // ✅ Search Books
+      function searchBooks() {
+        const searchValue = document
+          .getElementById("search-book")
+          .value.toLowerCase();
+        const bookItems = document.querySelectorAll(".book-item");
+
+        bookItems.forEach((item) => {
+          const text = item.textContent.toLowerCase();
+          item.style.display = text.includes(searchValue) ? "flex" : "none";
+        });
+      }
+
+      // ✅ Submit Return Request (Checks Pending Requests)
+      async function submitReturn() {
+        if (selectedBooks.length === 0) {
+          alert("⚠️ Select at least one book to return!");
+          return;
+        }
+
+        try {
+          // Check if the reader already has 2 pending return requests
+          const requestCheck = await fetch(
+            `/check-return-requests?reader_id=${readerID}`
+          );
+          const requestData = await requestCheck.json();
+
+          if (requestData.request_count >= 2) {
+            alert("⚠️ You already have 2 pending return requests!");
+            window.location.href = "welcome.html"; // Redirect to welcome page
+            return;
+          }
+
+          // Submit return request
+          const response = await fetch("/submit-return", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reader_id: readerID, books: selectedBooks }),
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            alert("✅ Return request submitted!");
+            selectedBooks = [];
+            window.location.href = "welcome.html"; // Redirect after submission
+          } else {
+            alert(data.message);
+          }
+        } catch (error) {
+          console.error(error);
+          alert("❌ Error submitting request!");
+        }
+      }
+    </script>
+  </body>
+</html>
