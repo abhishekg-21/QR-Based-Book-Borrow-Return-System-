@@ -13,7 +13,7 @@ const pool = new Pool({
   user: "neondb_owner",
   host: "ep-hidden-heart-a84r8c4i-pooler.eastus2.azure.neon.tech",
   database: "neondb",
-  password: "npg_eBCdj06kmtJf",
+  password: "npg_OAPGCtyKX02E",
   ssl: { rejectUnauthorized: false },
 });
 
