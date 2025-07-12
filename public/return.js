@@ -2,6 +2,13 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("login-btn")
     .addEventListener("click", validateReader);
+  document
+    .getElementById("submit-return-btn")
+    .addEventListener("click", submitReturn); // Added ID for event listener
+  document.getElementById("search-book").addEventListener("keyup", searchBooks);
+  document
+    .getElementById("modal-close-btn")
+    .addEventListener("click", closeModal); // Added ID for modal close button
 });
 
 let selectedBooks = [];
@@ -141,16 +148,40 @@ function renderBookList(books) {
       "rounded-md"
     );
 
-    bookItem.innerHTML = `
-            <span class="text-gray-800 font-medium text-left flex-grow">${book.book_id} - ${book.book_name}</span>
-            <button id="book-${book.book_id}" onclick="selectBook(${book.book_id})"
-                    class="ml-4 py-1 px-3 text-sm font-semibold rounded-md
-                           bg-blue-500 text-white hover:bg-blue-600
-                           focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75
-                           transition-all duration-200 ease-in-out">
-                Select
-            </button>
-        `;
+    const bookInfoSpan = document.createElement("span");
+    bookInfoSpan.classList.add(
+      "text-gray-800",
+      "font-medium",
+      "text-left",
+      "flex-grow"
+    );
+    bookInfoSpan.textContent = `${book.book_id} - ${book.book_name}`;
+
+    const selectButton = document.createElement("button");
+    selectButton.id = `book-${book.book_id}`;
+    selectButton.classList.add(
+      "ml-4",
+      "py-1",
+      "px-3",
+      "text-sm",
+      "font-semibold",
+      "rounded-md",
+      "bg-blue-500",
+      "text-white",
+      "hover:bg-blue-600",
+      "focus:outline-none",
+      "focus:ring-2",
+      "focus:ring-blue-400",
+      "focus:ring-opacity-75",
+      "transition-all",
+      "duration-200",
+      "ease-in-out"
+    );
+    selectButton.textContent = "Select";
+    selectButton.addEventListener("click", () => selectBook(book.book_id));
+
+    bookItem.appendChild(bookInfoSpan);
+    bookItem.appendChild(selectButton);
     bookList.appendChild(bookItem);
   });
 }

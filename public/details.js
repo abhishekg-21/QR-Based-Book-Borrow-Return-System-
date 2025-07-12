@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("login-btn")
     .addEventListener("click", validateReader);
+  document
+    .getElementById("modal-close-btn")
+    .addEventListener("click", closeModal); // Added ID for modal close button
 });
 
 let readerID = "";
@@ -114,13 +117,13 @@ async function fetchReaderDetails() {
 
     const data = await response.json();
     document.getElementById("reader-info").innerHTML = `
-            <p><strong class="font-semibold">Name:</strong> ${data.full_name}</p>
-            <p><strong class="font-semibold">Email:</strong> ${data.email}</p>
-            <p><strong class="font-semibold">Phone:</strong> ${data.mobile_number}</p>
-            <p><strong class="font-semibold">Age:</strong> ${data.dob}</p>
-            <p><strong class="font-semibold">Gender:</strong> ${data.gender}</p>
-            <p><strong class="font-semibold">Address:</strong> ${data.address}</p>
-        `;
+                    <p><strong class="font-semibold">Name:</strong> ${data.full_name}</p>
+                    <p><strong class="font-semibold">Email:</strong> ${data.email}</p>
+                    <p><strong class="font-semibold">Phone:</strong> ${data.mobile_number}</p>
+                    <p><strong class="font-semibold">Age:</strong> ${data.dob}</p>
+                    <p><strong class="font-semibold">Gender:</strong> ${data.gender}</p>
+                    <p><strong class="font-semibold">Address:</strong> ${data.address}</p>
+                `;
   } catch (error) {
     console.error("🚨 Fetch Reader Details Error:", error);
     showModal("Error", "❌ Failed to load reader details.");
@@ -213,27 +216,29 @@ function renderIssuedBooks(books) {
     );
 
     bookItem.innerHTML = `
-            <p><strong class="font-semibold">Book ID:</strong> ${
-              book.book_id
-            }</p>
-            <p><strong class="font-semibold">Book Name:</strong> ${
-              book.book_name
-            }</p>
-            <p><strong class="font-semibold">Issue Date:</strong> ${
-              book.issue_date
-            }</p>
-            <p><strong class="font-semibold">Due Date:</strong> ${
-              book.due_date
-            }</p>
-            <p><strong class="font-semibold">Return Status:</strong> <span class="${
-              book.return_date ? "text-green-600" : "text-red-600"
-            } font-bold">${book.return_date ? "Returned" : "Pending"}</span></p>
-            ${
-              book.return_date
-                ? `<p><strong class="font-semibold">Return Date:</strong> ${book.return_date}</p>`
-                : ""
-            }
-        `;
+                    <p><strong class="font-semibold">Book ID:</strong> ${
+                      book.book_id
+                    }</p>
+                    <p><strong class="font-semibold">Book Name:</strong> ${
+                      book.book_name
+                    }</p>
+                    <p><strong class="font-semibold">Issue Date:</strong> ${
+                      book.issue_date
+                    }</p>
+                    <p><strong class="font-semibold">Due Date:</strong> ${
+                      book.due_date
+                    }</p>
+                    <p><strong class="font-semibold">Return Status:</strong> <span class="${
+                      book.return_date ? "text-green-600" : "text-red-600"
+                    } font-bold">${
+      book.return_date ? "Returned" : "Pending"
+    }</span></p>
+                    ${
+                      book.return_date
+                        ? `<p><strong class="font-semibold">Return Date:</strong> ${book.return_date}</p>`
+                        : ""
+                    }
+                `;
     bookList.appendChild(bookItem);
   });
 }

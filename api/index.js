@@ -33,10 +33,10 @@ app.use(express.static(path.join(__dirname, "public")));
 // It's highly recommended to use environment variables for sensitive information like database credentials.
 // Example: process.env.DB_USER, process.env.DB_HOST, etc.
 const pool = new Pool({
-  user: "neondb_owner",
-  host: "ep-hidden-heart-a84r8c4i-pooler.eastus2.azure.neon.tech",
-  database: "neondb",
-  password: "npg_OAPGCtyKX02E",
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_DATABASE,
+  password: process.env.DB_PASSWORD,
   // Ensure rejectUnauthorized is false if using a self-signed certificate or for development.
   // For production, consider proper SSL certificate validation.
   ssl: { rejectUnauthorized: false },
@@ -239,9 +239,9 @@ app.get("/borrowed-books", async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT ib.book_id, b.book_name 
-             FROM issued_books ib 
-             JOIN books b ON ib.book_id = b.book_id 
-             WHERE ib.reader_id = $1 AND ib.return_date IS NULL`, // Only fetch books not yet returned
+                 FROM issued_books ib 
+                 JOIN books b ON ib.book_id = b.book_id 
+                 WHERE ib.reader_id = $1 AND ib.return_date IS NULL`, // Only fetch books not yet returned
       [reader_id]
     );
     res.json(result.rows);
@@ -352,13 +352,13 @@ app.get("/issued-books", async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT books.book_id, books.book_name, 
-                    TO_CHAR(issued_books.issue_date, 'YYYY-MM-DD') AS issue_date, 
-                    TO_CHAR(issued_books.due_date, 'YYYY-MM-DD') AS due_date, 
-                    TO_CHAR(issued_books.return_date, 'YYYY-MM-DD') AS return_date
-             FROM issued_books
-             JOIN books ON issued_books.book_id = books.book_id
-             WHERE issued_books.reader_id = $1
-             ORDER BY issued_books.issue_date DESC`, // Order by issue date for better readability
+                        TO_CHAR(issued_books.issue_date, 'YYYY-MM-DD') AS issue_date, 
+                        TO_CHAR(issued_books.due_date, 'YYYY-MM-DD') AS due_date, 
+                        TO_CHAR(issued_books.return_date, 'YYYY-MM-DD') AS return_date
+                 FROM issued_books
+                 JOIN books ON issued_books.book_id = books.book_id
+                 WHERE issued_books.reader_id = $1
+                 ORDER BY issued_books.issue_date DESC`, // Order by issue date for better readability
       [reader_id]
     );
     res.json(result.rows);
