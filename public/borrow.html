@@ -58,7 +58,7 @@
           class="w-full p-3 mb-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
         />
         <button
-          onclick="validateReader()"
+          id="login-btn"
           class="w-full py-3 px-6 text-lg font-bold rounded-lg shadow-md bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition-all duration-300 ease-in-out transform hover:scale-105"
         >
           Login
@@ -78,7 +78,6 @@
           type="text"
           id="search-book"
           placeholder="Search by Book ID or Name"
-          onkeyup="searchBooks()"
           class="w-full p-3 mb-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
         />
         <div
@@ -88,7 +87,7 @@
           <!-- Book items will be dynamically loaded here -->
         </div>
         <button
-          onclick="submitBorrow()"
+          id="submit-borrow-btn"
           class="w-full py-3 px-6 text-lg font-bold rounded-lg shadow-md bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition-all duration-300 ease-in-out transform hover:scale-105"
         >
           Submit Request
@@ -108,7 +107,7 @@
         <h3 id="modal-title" class="text-2xl font-bold mb-4 text-gray-800"></h3>
         <p id="modal-message" class="text-gray-700 mb-6"></p>
         <button
-          onclick="closeModal()"
+          id="modal-close-btn"
           class="py-2 px-6 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-200"
         >
           OK

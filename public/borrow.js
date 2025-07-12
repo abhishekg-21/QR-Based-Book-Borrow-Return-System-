@@ -1,4 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Attach event listeners after the DOM is fully loaded
+  document
+    .getElementById("login-btn")
+    .addEventListener("click", validateReader);
+  document
+    .getElementById("submit-borrow-btn")
+    .addEventListener("click", submitBorrow);
+  document.getElementById("search-book").addEventListener("keyup", searchBooks); // Attach listener for search input
+  document
+    .getElementById("modal-close-btn")
+    .addEventListener("click", closeModal); // Attach listener for modal close button
+
   fetchAvailableBooks();
 });
 
@@ -46,8 +58,11 @@ async function validateReader() {
   }
 
   try {
-    // Simulate API call for reader validation
     // In a real application, replace this with an actual fetch to your backend
+    // const response = await fetch(`/validate-reader?reader_id=${id}&full_name=${encodeURIComponent(name)}`);
+    // const data = await response.json();
+
+    // Simulate API call for reader validation
     const response = await new Promise((resolve) =>
       setTimeout(() => {
         if (id === "reader123" && name === "John Doe") {
@@ -91,8 +106,11 @@ async function validateReader() {
  */
 async function fetchAvailableBooks() {
   try {
-    // Simulate API call for available books
     // In a real application, replace this with an actual fetch to your backend
+    // const response = await fetch("/available-books");
+    // const books = await response.json();
+
+    // Simulate API call for available books
     const response = await new Promise((resolve) =>
       setTimeout(() => {
         resolve({
@@ -146,16 +164,41 @@ function renderBookList(books) {
       "rounded-md"
     );
 
-    bookItem.innerHTML = `
-            <span class="text-gray-800 font-medium text-left flex-grow">${book.book_id} - ${book.book_name}</span>
-            <button id="book-${book.book_id}" onclick="selectBook(${book.book_id})"
-                    class="ml-4 py-1 px-3 text-sm font-semibold rounded-md
-                           bg-blue-500 text-white hover:bg-blue-600
-                           focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75
-                           transition-all duration-200 ease-in-out">
-                Select
-            </button>
-        `;
+    const bookInfoSpan = document.createElement("span");
+    bookInfoSpan.classList.add(
+      "text-gray-800",
+      "font-medium",
+      "text-left",
+      "flex-grow"
+    );
+    bookInfoSpan.textContent = `${book.book_id} - ${book.book_name}`;
+
+    const selectButton = document.createElement("button");
+    selectButton.id = `book-${book.book_id}`;
+    selectButton.classList.add(
+      "ml-4",
+      "py-1",
+      "px-3",
+      "text-sm",
+      "font-semibold",
+      "rounded-md",
+      "bg-blue-500",
+      "text-white",
+      "hover:bg-blue-600",
+      "focus:outline-none",
+      "focus:ring-2",
+      "focus:ring-blue-400",
+      "focus:ring-opacity-75",
+      "transition-all",
+      "duration-200",
+      "ease-in-out"
+    );
+    selectButton.textContent = "Select";
+    // Attach event listener directly
+    selectButton.addEventListener("click", () => selectBook(book.book_id));
+
+    bookItem.appendChild(bookInfoSpan);
+    bookItem.appendChild(selectButton);
     bookList.appendChild(bookItem);
   });
 }
@@ -225,8 +268,15 @@ async function submitBorrow() {
   }
 
   try {
-    // Simulate API call for submitting borrow request
     // In a real application, replace this with an actual fetch to your backend
+    // const response = await fetch("/submit-borrow", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({ reader_id: readerID, books: selectedBooks }),
+    // });
+    // const data = await response.json();
+
+    // Simulate API call for submitting borrow request
     const response = await new Promise((resolve) =>
       setTimeout(() => {
         // Simulate success or failure
