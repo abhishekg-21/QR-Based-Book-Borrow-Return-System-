@@ -9,6 +9,7 @@
     { "src": "/borrow.html", "dest": "/public/borrow.html" },
     { "src": "/return.html", "dest": "/public/return.html" },
     { "src": "/details.html", "dest": "/public/details.html" },
+    { "src": "/(.*\\.js)", "dest": "/public/$1" },
     { "src": "/(.*)", "dest": "/public/welcome.html" }
   ]
 }
