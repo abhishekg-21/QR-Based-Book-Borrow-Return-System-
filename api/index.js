@@ -11,6 +11,21 @@ const path = require("path");
 app.use(express.json());
 // Enable CORS for all routes, allowing cross-origin requests from your frontend
 app.use(cors());
+
+// --- Content Security Policy (CSP) Configuration ---
+// This middleware sets the CSP header for all responses.
+// It's crucial for security and to allow necessary external resources.
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; " + // Allow resources from the same origin (your domain)
+      "script-src 'self' https://cdn.tailwindcss.com; " + // Allow scripts from self and Tailwind CDN
+      "style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com; " + // Allow styles from self, inline styles, Tailwind CDN, and Google Fonts stylesheet
+      "font-src 'self' https://fonts.gstatic.com;" // Explicitly allow fonts from Google Fonts' serving domain
+  );
+  next(); // Pass control to the next middleware/route handler
+});
+
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -40,6 +55,7 @@ pool.connect((err, client, release) => {
 
 // Serve `welcome.html` as the home page
 // When a GET request is made to the root URL, send the welcome.html file.
+// NOTE: If deploying to Vercel with vercel.json routes, this might be overridden by Vercel's static routing.
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "welcome.html"));
 });
