@@ -4,124 +4,111 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reader Details</title>
-    <link rel="stylesheet" href="detail.css" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Custom font import (Inter) */
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      /* Custom scrollbar for issued books list */
+      #issued-books::-webkit-scrollbar {
+        width: 8px;
+      }
+      #issued-books::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      #issued-books::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+      }
+      #issued-books::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+    </style>
   </head>
-  <body>
-    <div class="container">
+  <body
+    class="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 p-4"
+  >
+    <div
+      class="container bg-white p-6 sm:p-8 rounded-xl shadow-2xl max-w-md w-full text-center space-y-6"
+    >
+      <h1 class="text-4xl font-extrabold text-gray-800 mb-6">Reader Details</h1>
+
       <!-- Login Section -->
-      <div id="login-section">
-        <h2>Reader Login</h2>
-        <input type="text" id="reader-id" placeholder="Enter Reader ID" />
-        <input type="text" id="reader-name" placeholder="Enter Full Name" />
-        <button id="login-btn">Login</button>
-        <p id="error-message" class="error"></p>
+      <div
+        id="login-section"
+        class="bg-white p-6 rounded-lg shadow-lg border border-gray-200"
+      >
+        <h2 class="text-2xl font-semibold text-gray-700 mb-5">Reader Login</h2>
+        <input
+          type="text"
+          id="reader-id"
+          placeholder="Enter Reader ID"
+          class="w-full p-3 mb-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+        />
+        <input
+          type="text"
+          id="reader-name"
+          placeholder="Enter Full Name"
+          class="w-full p-3 mb-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+        />
+        <button
+          id="login-btn"
+          class="w-full py-3 px-6 text-lg font-bold rounded-lg shadow-md bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition-all duration-300 ease-in-out transform hover:scale-105"
+        >
+          Login
+        </button>
+        <p id="error-message" class="text-red-500 text-sm mt-3"></p>
       </div>
 
       <!-- Details Section (Hidden Initially) -->
-      <div id="details-section" class="hidden">
-        <h2>Reader Details</h2>
-        <div id="reader-info"></div>
+      <div
+        id="details-section"
+        class="bg-white p-6 rounded-lg shadow-lg border border-gray-200 hidden"
+      >
+        <h2 class="text-2xl font-semibold text-gray-700 mb-5">
+          Reader Information
+        </h2>
+        <div
+          id="reader-info"
+          class="text-left text-gray-700 space-y-2 mb-6 p-4 border border-gray-200 rounded-md bg-gray-50"
+        >
+          <!-- Reader details will be dynamically loaded here -->
+        </div>
 
-        <h2>Issued Books</h2>
-        <div id="issued-books"></div>
+        <h2 class="text-2xl font-semibold text-gray-700 mb-5">Issued Books</h2>
+        <div
+          id="issued-books"
+          class="max-h-60 overflow-y-auto border border-gray-300 rounded-md mb-4 bg-gray-50 p-2"
+        >
+          <!-- Issued books will be dynamically loaded here -->
+        </div>
       </div>
     </div>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        document
-          .getElementById("login-btn")
-          .addEventListener("click", validateReader);
-      });
+    <!-- Custom Modal for Alerts -->
+    <div
+      id="custom-modal"
+      class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden z-50"
+    >
+      <div
+        class="bg-white p-8 rounded-lg shadow-xl text-center max-w-sm w-full"
+      >
+        <h3 id="modal-title" class="text-2xl font-bold mb-4 text-gray-800"></h3>
+        <p id="modal-message" class="text-gray-700 mb-6"></p>
+        <button
+          onclick="closeModal()"
+          class="py-2 px-6 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-200"
+        >
+          OK
+        </button>
+      </div>
+    </div>
 
-      let readerID = "";
-
-      // ✅ Validate Reader
-      async function validateReader() {
-        const id = document.getElementById("reader-id").value.trim();
-        const name = document.getElementById("reader-name").value.trim();
-        const errorMessage = document.getElementById("error-message");
-
-        if (!id || !name) {
-          errorMessage.textContent = "⚠️ Reader ID and Name are required!";
-          return;
-        }
-
-        try {
-          const response = await fetch(
-            `/validate-reader?reader_id=${id}&full_name=${name}`
-          );
-          const data = await response.json();
-
-          if (data.valid) {
-            alert("✅ Login Successful!");
-            readerID = id;
-            document.getElementById("login-section").classList.add("hidden");
-            document
-              .getElementById("details-section")
-              .classList.remove("hidden");
-            fetchReaderDetails();
-            fetchIssuedBooks();
-          } else {
-            errorMessage.textContent = "❌ Invalid Reader ID or Name!";
-          }
-        } catch (error) {
-          console.error(error);
-          errorMessage.textContent = "❌ Server error. Try again!";
-        }
-      }
-
-      // ✅ Fetch Reader Details
-      async function fetchReaderDetails() {
-        try {
-          const response = await fetch(`/reader-details?reader_id=${readerID}`);
-          const data = await response.json();
-          document.getElementById("reader-info").innerHTML = `
-            <p><strong>Name:</strong> ${data.full_name}</p>
-            <p><strong>Email:</strong> ${data.email}</p>
-            <p><strong>Phone:</strong> ${data.mobile_number}</p>
-            <p><strong>Age:</strong> ${data.dob}</p>
-            <p><strong>Gender:</strong> ${data.gender}</p>
-            <p><strong>Address:</strong> ${data.address}</p>
-        `;
-        } catch (error) {
-          console.error(error);
-        }
-      }
-
-      // ✅ Fetch Issued Books
-      async function fetchIssuedBooks() {
-        try {
-          const response = await fetch(`/issued-books?reader_id=${readerID}`);
-          const books = await response.json();
-          renderIssuedBooks(books);
-        } catch (error) {
-          console.error(error);
-        }
-      }
-
-      // ✅ Render Issued Books List
-      function renderIssuedBooks(books) {
-        const bookList = document.getElementById("issued-books");
-        bookList.innerHTML = "";
-
-        books.forEach((book) => {
-          const bookItem = document.createElement("div");
-          bookItem.classList.add("book-item");
-
-          bookItem.innerHTML = `
-            <p><strong>Book:</strong> ${book.book_id}</p>
-            <p><strong>Book:</strong> ${book.book_name}</p>
-            <p><strong>Issue Date:</strong> ${book.issue_date}</p>
-            <p><strong>Due Date:</strong> ${book.due_date}</p>
-            <p><strong>Return Status:</strong> ${
-              book.return_date ? "Returned" : "Pending"
-            }</p>
-        `;
-
-          bookList.appendChild(bookItem);
-        });
-      }
-    </script>
+    <!-- Link to external JavaScript file -->
+    <script src="details.js"></script>
   </body>
 </html>

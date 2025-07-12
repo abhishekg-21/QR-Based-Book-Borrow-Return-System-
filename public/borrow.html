@@ -4,172 +4,119 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Borrow Book</title>
-    <link rel="stylesheet" href="borrow.css" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Custom font import (Inter) */
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      /* Custom scrollbar for book list */
+      #book-list::-webkit-scrollbar {
+        width: 8px;
+      }
+      #book-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      #book-list::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+      }
+      #book-list::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+    </style>
   </head>
-  <body>
-    <div class="container">
-      <h1>Borrow Books</h1>
+  <body
+    class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 p-4"
+  >
+    <div
+      class="container bg-white p-6 sm:p-8 rounded-xl shadow-2xl max-w-md w-full text-center space-y-6"
+    >
+      <h1 class="text-4xl font-extrabold text-gray-800 mb-6">Borrow Books</h1>
 
-      <!-- 📌 Reader Login Form -->
-      <div id="login-section" class="card">
-        <h2>Enter Reader Details</h2>
-        <input type="text" id="reader-id" placeholder="Enter Reader ID" />
-        <input type="text" id="reader-name" placeholder="Enter Full Name" />
-        <button onclick="validateReader()">Login</button>
-        <p id="error-message" class="error"></p>
+      <!-- Reader Login Form -->
+      <div
+        id="login-section"
+        class="bg-white p-6 rounded-lg shadow-lg border border-gray-200"
+      >
+        <h2 class="text-2xl font-semibold text-gray-700 mb-5">
+          Enter Reader Details
+        </h2>
+        <input
+          type="text"
+          id="reader-id"
+          placeholder="Enter Reader ID"
+          class="w-full p-3 mb-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+        />
+        <input
+          type="text"
+          id="reader-name"
+          placeholder="Enter Full Name"
+          class="w-full p-3 mb-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+        />
+        <button
+          onclick="validateReader()"
+          class="w-full py-3 px-6 text-lg font-bold rounded-lg shadow-md bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition-all duration-300 ease-in-out transform hover:scale-105"
+        >
+          Login
+        </button>
+        <p id="error-message" class="text-red-500 text-sm mt-3"></p>
       </div>
 
-      <!-- 📌 Book Selection Section (Hidden Initially) -->
-      <div id="book-section" class="card hidden">
-        <h2>Select Books to Borrow</h2>
+      <!-- Book Selection Section (Hidden Initially) -->
+      <div
+        id="book-section"
+        class="bg-white p-6 rounded-lg shadow-lg border border-gray-200 hidden"
+      >
+        <h2 class="text-2xl font-semibold text-gray-700 mb-5">
+          Select Books to Borrow
+        </h2>
         <input
           type="text"
           id="search-book"
           placeholder="Search by Book ID or Name"
           onkeyup="searchBooks()"
+          class="w-full p-3 mb-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
         />
-        <div id="book-list"></div>
-        <button onclick="submitBorrow()">Submit Request</button>
-        <p id="borrow-error" class="error"></p>
+        <div
+          id="book-list"
+          class="max-h-60 overflow-y-auto border border-gray-300 rounded-md mb-4 bg-gray-50 p-2"
+        >
+          <!-- Book items will be dynamically loaded here -->
+        </div>
+        <button
+          onclick="submitBorrow()"
+          class="w-full py-3 px-6 text-lg font-bold rounded-lg shadow-md bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition-all duration-300 ease-in-out transform hover:scale-105"
+        >
+          Submit Request
+        </button>
+        <p id="borrow-error" class="text-red-500 text-sm mt-3"></p>
       </div>
     </div>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        fetchAvailableBooks();
-      });
+    <!-- Custom Modal for Alerts -->
+    <div
+      id="custom-modal"
+      class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden z-50"
+    >
+      <div
+        class="bg-white p-8 rounded-lg shadow-xl text-center max-w-sm w-full"
+      >
+        <h3 id="modal-title" class="text-2xl font-bold mb-4 text-gray-800"></h3>
+        <p id="modal-message" class="text-gray-700 mb-6"></p>
+        <button
+          onclick="closeModal()"
+          class="py-2 px-6 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-200"
+        >
+          OK
+        </button>
+      </div>
+    </div>
 
-      let selectedBooks = [];
-      let readerID = "";
-      let requestCount = 0; // ✅ Store request count
-
-      // ✅ Validate Reader
-      async function validateReader() {
-        const id = document.getElementById("reader-id").value.trim();
-        const name = document.getElementById("reader-name").value.trim();
-        const errorMessage = document.getElementById("error-message");
-
-        if (!id || !name) {
-          errorMessage.textContent = "⚠️ Reader ID and Name are required!";
-          return;
-        }
-
-        try {
-          const response = await fetch(
-            `/validate-reader?reader_id=${id}&full_name=${name}`
-          );
-          const data = await response.json();
-
-          if (data.valid) {
-            alert("✅ Login Successful!");
-            readerID = id;
-            requestCount = data.requested; // ✅ Store number of requested books
-            document.getElementById("login-section").classList.add("hidden");
-            document.getElementById("book-section").classList.remove("hidden");
-            errorMessage.textContent = "";
-          } else {
-            errorMessage.textContent = "❌ Invalid Reader ID or Name!";
-          }
-        } catch (error) {
-          console.error(error);
-          errorMessage.textContent = "❌ Server error. Try again!";
-        }
-      }
-
-      // ✅ Fetch Available Books
-      async function fetchAvailableBooks() {
-        try {
-          const response = await fetch("/available-books");
-          const books = await response.json();
-          renderBookList(books);
-        } catch (error) {
-          console.error(error);
-        }
-      }
-
-      // ✅ Render Books in List
-      function renderBookList(books) {
-        const bookList = document.getElementById("book-list");
-        bookList.innerHTML = "";
-
-        books.forEach((book) => {
-          const bookItem = document.createElement("div");
-          bookItem.classList.add("book-item");
-
-          bookItem.innerHTML = `
-            <span>${book.book_id} - ${book.book_name}</span>
-            <button id="book-${book.book_id}" onclick="selectBook(${book.book_id})">Select</button>
-        `;
-
-          bookList.appendChild(bookItem);
-        });
-      }
-
-      // ✅ Search Books
-      function searchBooks() {
-        const searchValue = document
-          .getElementById("search-book")
-          .value.toLowerCase();
-        const bookItems = document.querySelectorAll(".book-item");
-
-        bookItems.forEach((item) => {
-          const text = item.textContent.toLowerCase();
-          item.style.display = text.includes(searchValue) ? "flex" : "none";
-        });
-      }
-
-      // ✅ Select Book
-      function selectBook(bookID) {
-        if (selectedBooks.length >= 2) {
-          alert("⚠️ You can only request 2 books at a time!");
-          return;
-        }
-
-        const bookButton = document.getElementById(`book-${bookID}`);
-
-        if (!selectedBooks.includes(bookID)) {
-          selectedBooks.push(bookID);
-          bookButton.style.backgroundColor = "red"; // ✅ Change color to red
-          bookButton.textContent = "Selected";
-        }
-      }
-
-      // ✅ Submit Borrow Request
-      async function submitBorrow() {
-        if (selectedBooks.length === 0) {
-          alert("⚠️ Select at least one book!");
-          return;
-        }
-
-        // ✅ Use stored request count instead of extra API call
-        if (requestCount + selectedBooks.length > 2) {
-          alert(
-            "⚠️ You have already made 2 requests! Returning to Welcome Page."
-          );
-          window.location.href = "welcome.html";
-          return;
-        }
-
-        try {
-          const response = await fetch("/submit-borrow", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ reader_id: readerID, books: selectedBooks }),
-          });
-
-          const data = await response.json();
-          if (data.success) {
-            alert("✅ Borrow request submitted!");
-            selectedBooks = [];
-            window.location.href = "welcome.html"; // ✅ Redirect after successful request
-          } else {
-            alert(data.message);
-          }
-        } catch (error) {
-          console.error("🚨 Fetch Error:", error);
-          alert("❌ Error submitting request!");
-        }
-      }
-    </script>
+    <!-- Link to external JavaScript file -->
+    <script src="borrow.js"></script>
   </body>
 </html>
